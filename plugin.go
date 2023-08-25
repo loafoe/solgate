@@ -1,4 +1,4 @@
-package lessor
+package solgate
 
 import (
 	"context"
@@ -25,14 +25,14 @@ type Middleware struct {
 // CaddyModule returns the Caddy module information.
 func (m *Middleware) CaddyModule() caddy.ModuleInfo {
 	return caddy.ModuleInfo{
-		ID:  "http.handlers.lessor",
+		ID:  "http.handlers.solgate",
 		New: func() caddy.Module { return new(Middleware) },
 	}
 }
 
 func init() {
 	caddy.RegisterModule(&Middleware{})
-	httpcaddyfile.RegisterHandlerDirective("lessor", parseCaddyfile)
+	httpcaddyfile.RegisterHandlerDirective("solgate", parseCaddyfile)
 }
 
 // Provision implements caddy.Provisioner.
@@ -65,7 +65,7 @@ func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next cadd
 // UnmarshalCaddyfile sets up Lessor from Caddyfile tokens. Syntax:
 // UnmarshalCaddyfile sets up the DNS provider from Caddyfile tokens. Syntax:
 //
-//	lessor [<issuer_url>] {
+//	solgate [<issuer_url>] {
 //	    issuer <issuer_url>
 //	}
 func (m *Middleware) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {

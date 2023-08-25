@@ -1,4 +1,4 @@
-# Default values for lessor.
+# Default values for solgate.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -10,7 +10,7 @@ issuer: "https://dex.hsp.hostedzonehere.com"
 replicaCount: 1
 
 image:
-  repository: ghcr.io/loafoe/lessor
+  repository: ghcr.io/loafoe/solgate
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -56,7 +56,7 @@ ingress:
     #  nginx.ingress.kubernetes.io/rewrite-target=/
     #  nginx.ingress.kubernetes.io/ssl-redirect=true
   hosts:
-    - host: lessor.local
+    - host: solgate.local
       paths:
         - path: /
           pathType: ImplementationSpecific

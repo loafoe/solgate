@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "lessor.fullname" . }}-test-connection"
+  name: "{{ include "solgate.fullname" . }}-test-connection"
   labels:
-    {{- include "lessor.labels" . | nindent 4 }}
+    {{- include "solgate.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "lessor.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "solgate.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

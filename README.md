@@ -1,6 +1,6 @@
-# lessor
+# solgate
 
-Caddy based plugin to dynamically inject `X-Scope-OrgID` header values into Loki bound requests.
+Caddy based plugin to manage (path based) access to services on K8S
 
 ## Building
 
@@ -15,7 +15,7 @@ go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 After xcaddy installation you can build caddy with this plugin by executing:
 
 ```shell
-xcaddy build v2.6.4 --with github.com/loafoe/lessor
+xcaddy build v2.6.4 --with github.com/loafoe/solgate
 ```
 
 ## Configuration
@@ -34,7 +34,7 @@ ingress:
   enabled: true
   className: "nginx"
   hosts:
-    - host: lessor.test.hostedzonehere.com
+    - host: solgate.test.hostedzonehere.com
       paths:
         - path: /
           pathType: ImplementationSpecific
@@ -43,11 +43,10 @@ ingress:
 Then deploy:
 
 ```shell
-helm template lessor charts/lessor --skip-tests --values values.yaml|kubectl apply -f - -n lessor
+helm template solgate charts/solgate --skip-tests --values values.yaml|kubectl apply -f - -n solgate
 ```
 
-Once deployed you can configure your Grafana Data source to point to `https://lessor.test.hostedzonehere.com`.
-Make sure you enable the `Forward OAuth Identity` option so lessor can extract tenant claims and inject the `X-Scope-OrgID`
+Once deployed you can configure your Grafana Data source to point to `https://solgate.test.hostedzonehere.com`.
 
 ## License
 

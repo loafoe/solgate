@@ -1,6 +1,6 @@
-module github.com/loafoe/lessor
+module github.com/loafoe/solgate
 
-go 1.20
+go 1.21
 
 require github.com/caddyserver/caddy/v2 v2.6.4
 

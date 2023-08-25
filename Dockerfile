@@ -7,7 +7,7 @@ RUN go mod download
 # Build
 COPY . .
 RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
-RUN /go/bin/xcaddy build --with github.com/loafoe/lessor
+RUN /go/bin/xcaddy build --with github.com/loafoe/solgate
 
 FROM alpine:latest
 USER root

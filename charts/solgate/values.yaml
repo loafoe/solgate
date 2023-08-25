@@ -3,9 +3,10 @@
 # Declare variables to be passed into your templates.
 
 loki:
-  url: loki-gateway.observability.svc
+  url: loki-gateway.loki-system.svc
 
-issuer: "https://dex.hsp.hostedzonehere.com"
+tempo:
+  url: tempo-gateway.tempo-system.svc
 
 replicaCount: 1
 

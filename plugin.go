@@ -1,23 +1,17 @@
 package solgate
 
 import (
-	"context"
-	"errors"
-	"fmt"
 	caddy "github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
+	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 	"net/http"
-	"strings"
-
-	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
 )
 
 type Middleware struct {
-	Issuer   string
+	Endpoint string
 	provider *oidc.Provider
 	logger   *zap.Logger
 }
@@ -38,13 +32,6 @@ func init() {
 // Provision implements caddy.Provisioner.
 func (m *Middleware) Provision(ctx caddy.Context) error {
 	m.logger = ctx.Logger() // g.logger is a *zap.Logger
-	provider, err := oidc.NewProvider(ctx, m.Issuer)
-	if err != nil {
-		m.logger.Error("error provisioning issuer", zap.String("issuer", m.Issuer), zap.Error(err))
-		return fmt.Errorf("erorr provisioning issuer '%s': %w", m.Issuer, err)
-		// handle error
-	}
-	m.provider = provider
 	return nil
 }
 
@@ -55,10 +42,7 @@ func (m *Middleware) Validate() error {
 
 // ServeHTTP implements caddyhttp.MiddlewareHandler.
 func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
-	err := m.injectScopeHeader(r)
-	if err != nil {
-		return err
-	}
+	// TODO: implement path checking here
 	return next.ServeHTTP(w, r)
 }
 
@@ -71,18 +55,18 @@ func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next cadd
 func (m *Middleware) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
 		if d.NextArg() {
-			m.Issuer = d.Val()
+			m.Endpoint = d.Val()
 		}
 		if d.NextArg() {
 			return d.ArgErr()
 		}
 		for nesting := d.Nesting(); d.NextBlock(nesting); {
 			switch d.Val() {
-			case "issuer":
-				if m.Issuer != "" {
-					return d.Err("Issuer already set")
+			case "endpoint":
+				if m.Endpoint != "" {
+					return d.Err("Endpoint already set")
 				}
-				m.Issuer = d.Val()
+				m.Endpoint = d.Val()
 				if d.NextArg() {
 					return d.ArgErr()
 				}
@@ -90,53 +74,6 @@ func (m *Middleware) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 				return d.Errf("unrecognized subdirective '%s'", d.Val())
 			}
 		}
-	}
-	return nil
-}
-
-func (m *Middleware) injectScopeHeader(r *http.Request) error {
-	// Extract tenants and inject them into X-Scope-OrgID header
-	tokenString := r.Header.Get("X-Id-Token")
-
-	if len(tokenString) == 0 { // Skip
-		return nil
-	}
-
-	verifier := m.provider.Verifier(&oidc.Config{
-		SkipClientIDCheck: true,
-	})
-
-	_, err := verifier.Verify(context.Background(), tokenString)
-	if err != nil {
-		m.logger.Error("failed to validate token", zap.Error(err), zap.Int("len", len(tokenString)))
-		return fmt.Errorf("token verification failed: %w", err)
-	}
-
-	type DexClaims struct {
-		LogReaders []string `json:"tenant:logreaders,omitempty"`
-		jwt.RegisteredClaims
-	}
-
-	token, err := jwt.ParseWithClaims(tokenString, &DexClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(""), jwt.ErrTokenUnverifiable // We already verified
-	})
-	if !errors.Is(err, jwt.ErrTokenUnverifiable) {
-		m.logger.Error("token parsing error", zap.Error(err))
-		return fmt.Errorf("token parsing error: %w", err)
-	}
-	// Verified
-	claims, ok := token.Claims.(*DexClaims)
-	if !ok {
-		m.logger.Error("invalid claims detected", zap.Error(err))
-		return fmt.Errorf("invalid claims detected: %w", err)
-	}
-	if len(claims.LogReaders) > 0 {
-		tenants := strings.Join(claims.LogReaders, "|")
-		m.logger.Info("setting X-Scope-OrgID to tenants found in claim", zap.String("tenants", tenants))
-		r.Header.Set("X-Scope-OrgID", tenants)
-	} else {
-		m.logger.Info("setting X-Scope-OrgID to fallback fake tenant")
-		r.Header.Set("X-Scope-OrgID", "fake") // Default to fake
 	}
 	return nil
 }

@@ -1,19 +1,19 @@
 package solgate
 
 import (
-	caddy "github.com/caddyserver/caddy/v2"
+	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/caddyconfig/httpcaddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
-	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/loafoe/solgate/storer"
 	"go.uber.org/zap"
 	"net/http"
 )
 
 type Middleware struct {
 	Endpoint string
-	provider *oidc.Provider
 	logger   *zap.Logger
+	store    *storer.Solgate
 }
 
 // CaddyModule returns the Caddy module information.

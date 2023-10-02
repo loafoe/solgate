@@ -8,4 +8,5 @@ type Token interface {
 	Create(token types.Token) (*types.Token, error)
 	Delete(id string) error
 	FindByID(id string) (*types.Token, error)
+	FindByToken(tkn string) (*types.Token, error)
 }

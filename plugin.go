@@ -8,6 +8,7 @@ import (
 	"github.com/loafoe/solgate/storer"
 	"go.uber.org/zap"
 	"net/http"
+	"time"
 )
 
 type Middleware struct {
@@ -43,6 +44,13 @@ func (m *Middleware) Validate() error {
 // ServeHTTP implements caddyhttp.MiddlewareHandler.
 func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 	// TODO: implement path checking here
+	token := r.URL.Path
+	found, err := m.store.Token.FindByToken(token)
+	if err != nil || found.ExpiresAt.After(time.Now()) {
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte(`{"message": "permission denied or token expired"}`))
+		return err
+	}
 	return next.ServeHTTP(w, r)
 }
 

@@ -28,3 +28,9 @@ func (t TokenStorer) FindByID(id string) (*types.Token, error) {
 	tx := t.DB.First(&token, "id = ?", id)
 	return &token, tx.Error
 }
+
+func (t TokenStorer) FindByToken(tkn string) (*types.Token, error) {
+	var token types.Token
+	tx := t.DB.First(&token, "value = ?", tkn)
+	return &token, tx.Error
+}

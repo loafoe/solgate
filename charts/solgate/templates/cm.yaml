@@ -46,8 +46,7 @@ data:
                         {
                           "handle": [
                             {
-                              "handler": "solgate",
-                              "issuer": "{{ .Values.issuer }}"
+                              "handler": "solgate"
                             },
                             {
                               "handler": "reverse_proxy",

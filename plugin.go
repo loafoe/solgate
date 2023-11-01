@@ -11,10 +11,12 @@ import (
 	"time"
 )
 
+// Middleware is a Caddy middleware type.
 type Middleware struct {
-	Endpoint string
-	logger   *zap.Logger
-	store    *storer.Solgate
+	Endpoint  string
+	EnableAPI bool
+	logger    *zap.Logger
+	store     *storer.Solgate
 }
 
 // CaddyModule returns the Caddy module information.
@@ -33,6 +35,7 @@ func init() {
 // Provision implements caddy.Provisioner.
 func (m *Middleware) Provision(ctx caddy.Context) error {
 	m.logger = ctx.Logger() // g.logger is a *zap.Logger
+	m.logger.Info("provisioning plugin")
 	return nil
 }
 
@@ -44,9 +47,12 @@ func (m *Middleware) Validate() error {
 // ServeHTTP implements caddyhttp.MiddlewareHandler.
 func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 	// TODO: implement path checking here
+	m.logger.Info("serving request")
+
 	token := r.URL.Path
 	found, err := m.store.Token.FindByToken(token)
 	if err != nil || found.ExpiresAt.After(time.Now()) {
+		m.logger.Info("refusing connection")
 		w.WriteHeader(http.StatusForbidden)
 		_, _ = w.Write([]byte(`{"message": "permission denied or token expired"}`))
 		return err
@@ -57,9 +63,10 @@ func (m *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request, next cadd
 // UnmarshalCaddyfile sets up Lessor from Caddyfile tokens. Syntax:
 // UnmarshalCaddyfile sets up the DNS provider from Caddyfile tokens. Syntax:
 //
-//	solgate [<issuer_url>] {
-//	    issuer <issuer_url>
-//	}
+//		solgate <endpoint_url> {
+//		    endpoint <endpoint_url>
+//	     api      <bool>
+//		}
 func (m *Middleware) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
 		if d.NextArg() {
@@ -75,6 +82,11 @@ func (m *Middleware) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 					return d.Err("Endpoint already set")
 				}
 				m.Endpoint = d.Val()
+				if d.NextArg() {
+					return d.ArgErr()
+				}
+			case "api":
+				m.EnableAPI = d.Val() == "true"
 				if d.NextArg() {
 					return d.ArgErr()
 				}

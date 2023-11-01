@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/caddyserver/caddy/v2 v2.7.4
 	go.uber.org/zap v1.26.0
+	github.com/coreos/go-oidc/v3 v3.5.0
 	gorm.io/gorm v1.25.4
 )
 

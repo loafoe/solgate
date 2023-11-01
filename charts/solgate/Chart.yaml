@@ -4,6 +4,6 @@ description: Caddy plugin to manage (path based) access to services
 
 type: application
 
-version: 0.0.10
+version: 0.0.13
 
-appVersion: "v0.0.10"
+appVersion: "v0.0.13"

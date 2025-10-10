@@ -1,11 +1,10 @@
 module github.com/loafoe/solgate
 
-go 1.21
+go 1.24.0
 
 require (
 	github.com/caddyserver/caddy/v2 v2.7.6
 	go.uber.org/zap v1.26.0
-	github.com/coreos/go-oidc/v3 v3.5.0
 	gorm.io/gorm v1.25.4
 )
 
@@ -100,6 +99,7 @@ require (
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/oauth2 v0.28.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
